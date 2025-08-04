@@ -1,0 +1,26 @@
+{
+  "name": "dps-viewer",
+  "description": "A lightweight DPS viewer for XHGM",
+  "author": "carryma11<MYHmath123@163.com>",
+  "version": "1.0.0",
+  "main": "main.js",
+  "build": {
+    "appId": "com.carryma11.dpsviewer",
+    "productName": "xhgm-DPS Viewer",
+    "forceCodeSigning": false,
+    "cscLink": null,
+    "win": {
+      "target": "portable",
+      "icon": "image.ico"
+    }
+  },
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^37.2.5",
+    "electron-builder": "^26.0.12"
+}
+}
+

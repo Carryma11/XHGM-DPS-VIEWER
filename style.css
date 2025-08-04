@@ -1,0 +1,76 @@
+html, body {
+  margin: 0;
+  /* background-color: rgba(0, 0, 0, 0.1);  */
+  background: transparent; /* 透明背景 */
+  color: white;
+  font-family: sans-serif;
+  transform: scale(1);
+  transform-origin: top left;
+  user-select: none;
+}
+
+/* 拖拽区域 */
+#titlebar {
+  -webkit-app-region: drag;
+  height: 25px;
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;  /* ✅ 左右布局 */
+  align-items: center;             /* ✅ 垂直居中 */
+  padding: 0 10px;
+  font-size: 15px;
+  color: white;
+}
+
+.title-buttons {
+  -webkit-app-region: no-drag;
+  display: flex;
+  gap: 1px;
+}
+
+.title-buttons button {
+  width: 32px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.title-buttons button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 控制区 */
+#controls {
+  padding: 10px;
+  -webkit-app-region: no-drag;
+}
+
+button {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #666;
+}
+
+canvas {
+  display: block;
+  background: #2e2e2e;
+  border-radius: 10px;
+  margin: 0 auto 20px auto;
+}
+
+#noData {
+  text-align: center;
+  color: #ccc;
+  font-style: italic;
+}
