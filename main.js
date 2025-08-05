@@ -6,8 +6,8 @@ let tray;
 
 function createWindow() {
   const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
-  const winWidth = 350;
-  const winHeight = 400;
+  const winWidth = 360;
+  const winHeight = 250;
 
   const x = screenW - winWidth;
   const y = screenH - winHeight - 200;

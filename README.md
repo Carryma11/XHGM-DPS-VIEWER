@@ -15,8 +15,12 @@ https://github.com/dmlgzs/StarResonanceDamageCounter?tab=readme-ov-file<br>
 新增实时伤害与总伤害切换按钮<br>
 当伤害超过1M时，使用M.3f作为单位<br>
 
-<img width="525" height="485" alt="v1_1_1" src="https://github.com/user-attachments/assets/aeadfd7c-12a4-4542-9b91-ecb4a872377c" />
+## 1.2.0 features
+将查看实时伤害改为查看秒均伤害<br>
+优化柱状图视觉表现与排序<br>
 
+## show case
+<img width="543" height="204" alt="v1_2_0" src="https://github.com/user-attachments/assets/a117f453-fcef-4b15-8a23-b7946ef9762e" />
 
 ## TODO
 缓存uid与用户昵称，使交互更友好
