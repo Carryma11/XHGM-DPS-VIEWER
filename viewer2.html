@@ -14,11 +14,28 @@
       <button id="close">✕</button>
     </div>
   </div>
+
   <div id="controls">
     <button id="clearBtn">清空所有统计数据</button>
+    <button id="toggleRealtimeBtn">查看实时伤害</button>
+    <button id="opacityBtn">设置透明度</button>
   </div>
+
   <canvas id="barChart" width="350" height="250"></canvas>
   <div id="noData" style="display: none;">暂无用户数据</div>
+  <div id="opacityPanel" style="
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 20px;
+    background: rgba(50, 50, 50, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 1000;
+  ">
+    <label for="opacityRange" style="color: white;">透明度</label>
+    <input type="range" id="opacityRange" min="0.2" max="1" step="0.05" value="1" style="width: 150px;" />
+  </div>
 
   <script>
     Chart.register(ChartDataLabels);
@@ -26,6 +43,11 @@
     const ctx = document.getElementById('barChart').getContext('2d');
     const noDataDiv = document.getElementById('noData');
     const clearBtn = document.getElementById('clearBtn');
+    const toggleRealtimeBtn = document.getElementById('toggleRealtimeBtn');
+    const opacityPanel = document.getElementById('opacityPanel');
+    const opacityRange = document.getElementById('opacityRange');
+
+    let showRealtime = false;
 
     const barChart = new Chart(ctx, {
       type: 'bar',
@@ -35,7 +57,7 @@
           label: '总伤害',
           data: [],
           backgroundColor: [],
-          borderColor: 'rgba(75, 192, 192, 1)',
+          borderColor: 'rgba(75, 192, 192, 0.8)',
           borderWidth: 1
         }]
       },
@@ -43,37 +65,44 @@
         indexAxis: 'y',
         responsive: true,
         plugins: {
-          legend: { display: false },
+          legend: { display: true },
           datalabels: {
             anchor: 'center',
             align: 'center',
             color: 'white',
             font: { weight: 'bold', size: 12 },
-            formatter: value => value.toLocaleString()
-          }
+            formatter: value => {
+              if (value >= 1000000000) {
+                return (value / 1000000).toFixed(2) + 'M'; // 以M显示
+              } else if (value >= 1000000) {
+                return (value / 1000000).toFixed(3) + 'M';
+              } else {
+                return value.toLocaleString(); // 默认带千位逗号
+              }
+            }
+          },
         },
         scales: {
           x: {
             beginAtZero: true,
-            display: false   // 隐藏 X 轴
+            display: false
           }
         }
       },
       plugins: [ChartDataLabels]
     });
 
-    // 根据数值大小返回5档颜色
     function getColorByValue(value, min, max) {
       const colors = [
-        'rgba(255, 99, 132, 0.6)',   // 红
-        'rgba(255, 159, 64, 0.6)',   // 橙
-        'rgba(255, 205, 86, 0.6)',   // 黄
-        'rgba(75, 192, 192, 0.6)',   // 绿
-        'rgba(54, 162, 235, 0.6)'    // 蓝
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(255, 159, 64, 0.6)',
+        'rgba(255, 205, 86, 0.6)',
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(54, 162, 235, 0.6)'
       ];
-      const range = max - min || 1;  // 防止除零
+      if (min === max) return colors[2];
+      const range = max - min || 1;
       const step = range / 5;
-
       if (value <= min + step) return colors[0];
       else if (value <= min + step * 2) return colors[1];
       else if (value <= min + step * 3) return colors[2];
@@ -88,7 +117,8 @@
 
         const users = Object.entries(data.user || {}).map(([id, info]) => ({
           id,
-          total: info.total_damage.total
+          total: info.total_damage.total,
+          realtime: info.realtime_dps || 0
         }));
 
         const topUsers = users.sort((a, b) => b.total - a.total).slice(0, 20);
@@ -99,19 +129,31 @@
           barChart.data.datasets[0].backgroundColor = [];
           barChart.update();
           noDataDiv.style.display = 'block';
+          return;
         } else {
           noDataDiv.style.display = 'none';
 
           const labels = topUsers.map(u => `用户 ${u.id}`);
-          const values = topUsers.map(u => u.total);
 
-          const minVal = Math.min(...values);
-          const maxVal = Math.max(...values);
-          const colors = values.map(v => getColorByValue(v, minVal, maxVal));
+          let values, minVal, maxVal, colors, label;
+
+          if (showRealtime) {
+            values = topUsers.map(u => u.realtime);
+            label = '实时伤害';
+          } else {
+            values = topUsers.map(u => u.total);
+            label = '总伤害';
+          }
+
+          minVal = Math.min(...values);
+          maxVal = Math.max(...values);
+          colors = values.map(v => getColorByValue(v, minVal, maxVal));
 
           barChart.data.labels = labels;
+          barChart.data.datasets[0].label = label;
           barChart.data.datasets[0].data = values;
           barChart.data.datasets[0].backgroundColor = colors;
+
           barChart.update();
         }
       } catch (e) {
@@ -139,14 +181,33 @@
     fetchAndUpdate();
     setInterval(fetchAndUpdate, 1000);
 
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('min')?.addEventListener('click', () => {
-        window.electronAPI.minimize();
-      });
+    toggleRealtimeBtn.onclick = () => {
+      showRealtime = !showRealtime;
+      toggleRealtimeBtn.textContent = showRealtime ? '查看总伤害' : '查看实时伤害';
+      fetchAndUpdate();
+    };
 
-      document.getElementById('close')?.addEventListener('click', () => {
-        window.electronAPI.close();
-      });
+    document.getElementById('min').addEventListener('click', () => {
+      window.electronAPI?.minimize();
+    });
+    document.getElementById('close').addEventListener('click', () => {
+      window.electronAPI?.close();
+    });
+    opacityBtn.onclick = () => {
+      const current = parseFloat(document.body.style.opacity || "1");
+      opacityRange.value = current;
+      opacityPanel.style.display = (opacityPanel.style.display === 'none') ? 'block' : 'none';
+    };
+
+    // 滑动时实时更新透明度
+    opacityRange.oninput = () => {
+      document.body.style.opacity = opacityRange.value;
+    };
+    // 点击其他区域隐藏滑块面板
+    document.addEventListener('click', (e) => {
+      if (!opacityPanel.contains(e.target) && e.target !== opacityBtn) {
+        opacityPanel.style.display = 'none';
+      }
     });
   </script>
 </body>

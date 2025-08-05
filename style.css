@@ -7,6 +7,8 @@ html, body {
   transform: scale(1);
   transform-origin: top left;
   user-select: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
 /* 拖拽区域 */
@@ -16,8 +18,8 @@ html, body {
   background: rgba(30, 30, 30, 0.7);
   backdrop-filter: blur(10px);
   display: flex;
-  justify-content: space-between;  /* ✅ 左右布局 */
-  align-items: center;             /* ✅ 垂直居中 */
+  justify-content: space-between;  /* 左右布局 */
+  align-items: center;             /* 垂直居中 */
   padding: 0 10px;
   font-size: 15px;
   color: white;
@@ -53,7 +55,7 @@ button {
   background-color: #444;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 0 10px;
   cursor: pointer;
   border-radius: 5px;
 }
@@ -73,4 +75,12 @@ canvas {
   text-align: center;
   color: #ccc;
   font-style: italic;
+}
+
+#opacityPanel {
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+#opacityPanel input[type="range"] {
+  accent-color: white;
 }

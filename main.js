@@ -19,8 +19,8 @@ function createWindow() {
     y,
     frame: false,
     resizable: true,
-    skipTaskbar: true, // 👉 不显示任务栏图标（转为托盘）
-    show: true,       // 👉 初始隐藏，依赖托盘控制显示
+    skipTaskbar: true, // 不显示任务栏图标（转为托盘）
+    show: true,       // 初始显示
     transparent: true,
     alwaysOnTop: true,
     focusable: true,
@@ -37,8 +37,7 @@ function createWindow() {
 }
 
 function createTray() {
-  tray = new Tray(path.join(__dirname, 'image.png')); // 你需要放一个icon.ico或icon.png在根目录
-
+  tray = new Tray(path.join(__dirname, 'image.png'));
   const contextMenu = Menu.buildFromTemplate([
     {
       label: '显示/隐藏窗口',
