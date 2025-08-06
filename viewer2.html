@@ -48,6 +48,19 @@
   
 
   <script>
+    let nicknameMap = {};
+
+    // 加载昵称映射文件
+    async function loadNicknameMap() {
+      try {
+        const res = await fetch('./users.json'); // 确保路径正确
+        nicknameMap = await res.json();
+        console.log('昵称映射加载成功:', nicknameMap);
+          } catch (e) {
+        console.warn('加载 users.json 失败,将使用用户ID代替昵称', e);
+        // 失败也不影响主功能，继续用ID
+        }
+  }
     Chart.register(ChartDataLabels);
 
     const ctx = document.getElementById('barChart').getContext('2d');
@@ -115,6 +128,7 @@
             ticks: {
               autoSkip: false, // 不跳过标签
               font: {
+                weight: 'bold',
                 size: 12 // 增加字号以提升可读性
               }
             }
@@ -124,6 +138,7 @@
       plugins: [ChartDataLabels]
     });
 
+    // 根据输出高低设置柱状图颜色
     function getColorByValue(value, min, max) {
       const colors = [
         'rgba(255, 99, 132, 0.6)',
@@ -142,6 +157,34 @@
       else return colors[4];
     }
 
+    // 职业颜色映射表
+    const classColorMap = {
+      '驭兽': 'rgba(255, 99, 132, 0.7)',   // 红色
+      '驯鹰': 'rgba(255, 99, 132, 0.7)',
+      '冰矛': 'rgba(54, 162, 235, 0.7)',   // 蓝色
+      '射线': 'rgba(54, 162, 235, 0.7)',
+      '空战': 'rgba(75, 192, 192, 0.7)',   // 青色
+      '重装': 'rgba(75, 192, 192, 0.7)',
+      '防护': 'rgba(255, 205, 86, 0.7)',   // 黄色
+      '光盾': 'rgba(255, 205, 86, 0.7)',
+      '居合': 'rgba(153, 102, 255, 0.7)',  // 紫色
+      '月刃': 'rgba(153, 102, 255, 0.7)',
+      '岩盾': 'rgba(149, 152, 155, 0.7)',  // 灰色
+      '格挡': 'rgba(149, 152, 155, 0.7)',
+      '愈合': 'rgba(0, 100, 0, 1)',  // 深绿
+      '惩击': 'rgba(0, 100, 0, 1)',
+      '协奏': 'rgba(152, 251, 152, 1)', // 浅绿
+      '狂音': 'rgba(152, 251, 152, 1)',
+      // 默认颜色（未知职业时使用）
+      'default': 'rgba(201, 203, 207, 0.7)' // 灰白
+    };
+
+    // 根据职业设置设置柱状图颜色
+    function getColorByClass(className) {
+      return classColorMap[className] || classColorMap['default'];
+    }
+
+    // 更新图表
     async function fetchAndUpdate() {
       try {
         const res = await fetch('http://localhost:8989/api/data');
@@ -150,7 +193,9 @@
         const users = Object.entries(data.user || {}).map(([id, info]) => ({
           id,
           total: info.total_damage.total,
-          total_dps: info.total_dps || 0
+          total_dps: info.total_dps || 0,
+          total_heal: info.total_healing.total || 0,
+          class_name: info.profession
         }));
 
         const sortedUsers = users.sort((a, b) => {
@@ -169,7 +214,8 @@
         } else {
           noDataDiv.style.display = 'none';
 
-          const labels = topUsers.map(u => `${u.id}`);
+          const labels = topUsers.map(u => {return nicknameMap[u.id] || u.id; // 使用昵称，找不到就用ID
+          });
 
           let values, minVal, maxVal, colors, label;
 
@@ -181,9 +227,11 @@
             label = '总伤害';
           }
 
-          minVal = Math.min(...values);
-          maxVal = Math.max(...values);
-          colors = values.map(v => getColorByValue(v, minVal, maxVal));
+          // minVal = Math.min(...values);
+          // maxVal = Math.max(...values);
+          // colors = values.map(v => getColorByValue(v, minVal, maxVal)); // 根据数值上色
+
+          colors = topUsers.map(u => getColorByClass(u.class_name)); // 根据职业上色
 
           barChart.data.labels = labels;
           barChart.data.datasets[0].label = label;
@@ -229,8 +277,13 @@
       }
     };
 
-    fetchAndUpdate();
-    setInterval(fetchAndUpdate, 1000);
+    async function init() {
+      await loadNicknameMap();        // 先加载昵称
+      fetchAndUpdate();               // 再获取数据
+      setInterval(fetchAndUpdate, 1000);
+    }
+
+    init(); // 启动
 
     toggleRealtimeBtn.onclick = () => {
       showRealtime = !showRealtime;

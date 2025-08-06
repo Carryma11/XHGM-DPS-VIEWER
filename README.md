@@ -3,7 +3,7 @@
 
 ## 需要先配置好后端
 https://github.com/dmlgzs/StarResonanceDamageCounter?tab=readme-ov-file<br>
-然后运行exe即可
+npm start即可(或选择运行exe，则无法设置用户昵称)
 
 ## 1.0.0 features
 默认显示在屏幕右下角，鼠标拖动标题栏可调整位置，可自定义大小<br>
@@ -19,9 +19,14 @@ https://github.com/dmlgzs/StarResonanceDamageCounter?tab=readme-ov-file<br>
 将查看实时伤害改为查看秒均伤害<br>
 优化柱状图视觉表现与排序<br>
 
-## show case
+## 1.3.0 features
+柱状图由根据输出高低改为根据天赋流派更改颜色<br>
+新增users.json,可自定义设置id与昵称的对应关系并将y轴显示为昵称(tmp)<br>
+
+## 1.2.0 show case
 <img width="543" height="204" alt="v1_2_0" src="https://github.com/user-attachments/assets/a117f453-fcef-4b15-8a23-b7946ef9762e" />
 
 ## TODO
-缓存uid与用户昵称，使交互更友好
+根据后端新增的data更新总治疗/秒均治疗,承受伤害等数据的显示
+
 
