@@ -158,23 +158,37 @@
     }
 
     // 职业颜色映射表
-    const classColorMap = {
-      '驭兽': 'rgba(255, 99, 132, 0.7)',   // 红色
-      '驯鹰': 'rgba(255, 99, 132, 0.7)',
+    const classColorMap_old = {
+      '狼弓': 'rgba(255, 99, 132, 0.7)',   // 红色
+      '鹰弓': 'rgba(255, 99, 132, 0.7)',
       '冰矛': 'rgba(54, 162, 235, 0.7)',   // 蓝色
       '射线': 'rgba(54, 162, 235, 0.7)',
-      '空战': 'rgba(75, 192, 192, 0.7)',   // 青色
+      '空枪': 'rgba(75, 192, 192, 0.7)',   // 青色
       '重装': 'rgba(75, 192, 192, 0.7)',
-      '防护': 'rgba(255, 205, 86, 0.7)',   // 黄色
+      '防盾': 'rgba(255, 205, 86, 0.7)',   // 黄色
       '光盾': 'rgba(255, 205, 86, 0.7)',
       '居合': 'rgba(153, 102, 255, 0.7)',  // 紫色
       '月刃': 'rgba(153, 102, 255, 0.7)',
-      '岩盾': 'rgba(149, 152, 155, 0.7)',  // 灰色
-      '格挡': 'rgba(149, 152, 155, 0.7)',
-      '愈合': 'rgba(0, 100, 0, 1)',  // 深绿
-      '惩击': 'rgba(0, 100, 0, 1)',
-      '协奏': 'rgba(152, 251, 152, 1)', // 浅绿
-      '狂音': 'rgba(152, 251, 152, 1)',
+      '岩盾': 'rgba(165, 42, 42, 0.7)',  // 棕色
+      '格挡': 'rgba(165, 42, 42, 0.7)',
+      '愈合': 'rgba(0, 100, 0, 0.8)',  // 深绿
+      '惩戒': 'rgba(0, 100, 0, 0.8)',
+      '协奏': 'rgba(120, 255, 120, 0.7)', // 浅绿
+      '狂音': 'rgba(120, 255, 120, 0.7)',
+      // 默认颜色（未知职业时使用）
+      'default': 'rgba(201, 203, 207, 0.7)' // 灰白
+    };
+
+        // 职业颜色映射表
+    const classColorMap = {
+      '神射手': 'rgba(255, 99, 132, 0.7)',   // 红色
+      '冰魔导师': 'rgba(54, 162, 235, 0.7)',   // 蓝色
+      '青岚骑士': 'rgba(75, 192, 192, 0.7)',   // 青色
+      '神盾骑士': 'rgba(255, 205, 86, 0.7)',   // 黄色
+      '雷影剑士': 'rgba(153, 102, 255, 0.7)',  // 紫色
+      '巨刃守护者': 'rgba(165, 42, 42, 0.7)',  // 棕色
+      '森语者': 'rgba(0, 100, 0, 0.8)',  // 深绿
+      '灵魂乐手': 'rgba(120, 255, 120, 0.7)', // 浅绿
       // 默认颜色（未知职业时使用）
       'default': 'rgba(201, 203, 207, 0.7)' // 灰白
     };
@@ -195,12 +209,16 @@
           total: info.total_damage.total,
           total_dps: info.total_dps || 0,
           total_heal: info.total_healing.total || 0,
-          class_name: info.profession
+          class_name: info.profession,
+          user_name: info.name || id,
         }));
 
-        const sortedUsers = users.sort((a, b) => {
+        const filteredUsers = users.filter(u => u.total > 0);
+
+        const sortedUsers = filteredUsers.sort((a, b) => {
           return showRealtime ? b.total_dps - a.total_dps : b.total - a.total;
         });
+
         const topUsers = sortedUsers.slice(0, 20);
         adjustChartHeight(topUsers.length);
 
@@ -214,10 +232,10 @@
         } else {
           noDataDiv.style.display = 'none';
 
-          const labels = topUsers.map(u => {return nicknameMap[u.id] || u.id; // 使用昵称，找不到就用ID
-          });
+          // const labels = topUsers.map(u => {return nicknameMap[u.id] || u.id; }); // 使用昵称，找不到就用ID
+          const labels = topUsers.map(u => u.user_name);
+          let label;
 
-          let values, minVal, maxVal, colors, label;
 
           if (showRealtime) {
             values = topUsers.map(u => u.total_dps.toFixed(1));
@@ -231,7 +249,9 @@
           // maxVal = Math.max(...values);
           // colors = values.map(v => getColorByValue(v, minVal, maxVal)); // 根据数值上色
 
-          colors = topUsers.map(u => getColorByClass(u.class_name)); // 根据职业上色
+          const colors = topUsers.map(u => getColorByClass(u.class_name)); // 根据职业上色
+          // console.log('当前职业列表:', [...new Set(topUsers.map(u => u.class_name))]);  //debug
+          // console.log('当前玩家昵称:', [...new Set(topUsers.map(u => u.user_name))]); //debug
 
           barChart.data.labels = labels;
           barChart.data.datasets[0].label = label;
@@ -248,8 +268,8 @@
     }
 
     function adjustChartHeight(userCount) {
-      const rowHeight = 30; // 每个用户的高度（可根据需要调整）
-      const minHeight = 60; // 最小高度限制
+      const rowHeight = 35; // 每个用户的高度（可根据需要调整）
+      const minHeight = 70; // 最小高度限制
       const canvasHeight = Math.max(userCount * rowHeight, minHeight);
 
       const chartCanvas = document.getElementById('barChart');
@@ -278,7 +298,7 @@
     };
 
     async function init() {
-      await loadNicknameMap();        // 先加载昵称
+      // await loadNicknameMap();        // 先加载昵称
       fetchAndUpdate();               // 再获取数据
       setInterval(fetchAndUpdate, 1000);
     }
