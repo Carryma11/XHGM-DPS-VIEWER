@@ -23,10 +23,14 @@ npm start即可(或选择运行exe，则无法设置用户昵称)
 柱状图由根据输出高低改为根据天赋流派更改颜色<br>
 新增users.json,可自定义设置id与昵称的对应关系并将y轴显示为昵称(tmp)<br>
 
+## 1.3.1 features
+用户昵称改为从后端获取<br>
+同步更新天赋颜色对应逻辑以匹配后端的更新<br>
+
 ## 1.2.0 show case
 <img width="543" height="204" alt="v1_2_0" src="https://github.com/user-attachments/assets/a117f453-fcef-4b15-8a23-b7946ef9762e" />
 
 ## TODO
-根据后端新增的data更新总治疗/秒均治疗,承受伤害等数据的显示
+根据后端新增的res更新总治疗/秒均治疗,承受伤害,技能详细占比等数据的显示
 
 
