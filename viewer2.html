@@ -105,7 +105,9 @@
           },
           datalabels: {
             anchor: 'center',
-            align: 'center',
+            align: 'end',
+            offset: 4,        // 标签距离柱条末端的像素
+            clamp: true,      // 防止标签超出图表区域
             color: 'white',
             font: { weight: 'bold', size: 12 },
             formatter: value => {
